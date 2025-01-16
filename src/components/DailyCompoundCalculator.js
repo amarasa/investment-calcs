@@ -6,12 +6,34 @@ export default function DailyCompoundCalculator({ onCalculate }) {
 	const [reinvestRate, setReinvestRate] = useState("100");
 	const [startDate, setStartDate] = useState("");
 	const [endDate, setEndDate] = useState("");
-	const [dayType, setDayType] = useState("Weekdays");
+	const [selectedDays, setSelectedDays] = useState({
+		Monday: false,
+		Tuesday: false,
+		Wednesday: false,
+		Thursday: false,
+		Friday: false,
+		Saturday: false,
+		Sunday: false,
+	});
+
+	const toggleDay = (day) => {
+		setSelectedDays((prev) => ({
+			...prev,
+			[day]: !prev[day],
+		}));
+	};
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		if (!startingCapital || !startDate || !endDate) {
 			alert("Please fill in all required fields.");
+			return;
+		}
+		const activeDays = Object.keys(selectedDays).filter(
+			(day) => selectedDays[day]
+		);
+		if (activeDays.length === 0) {
+			alert("Please select at least one trading day.");
 			return;
 		}
 		onCalculate({
@@ -20,7 +42,7 @@ export default function DailyCompoundCalculator({ onCalculate }) {
 			reinvestRate: parseFloat(reinvestRate) / 100,
 			startDate: new Date(startDate),
 			endDate: new Date(endDate),
-			weekdaysOnly: dayType === "Weekdays",
+			selectedDays: activeDays,
 		});
 	};
 
@@ -98,17 +120,23 @@ export default function DailyCompoundCalculator({ onCalculate }) {
 			</div>
 
 			<div className='mb-4'>
-				<label className='block mb-2 font-bold'>Days to Include</label>
-				<select
-					value={dayType}
-					onChange={(e) => setDayType(e.target.value)}
-					className='w-full p-2 border rounded'
-				>
-					<option value='Weekdays'>Weekdays</option>
-					<option value='Weekdays and Weekends'>
-						Weekdays and Weekends
-					</option>
-				</select>
+				<label className='block mb-2 font-bold'>
+					Select Trading Days
+				</label>
+				<div className='grid grid-cols-3 gap-2'>
+					{Object.keys(selectedDays).map((day) => (
+						<div key={day} className='flex items-center'>
+							<input
+								type='checkbox'
+								id={day}
+								checked={selectedDays[day]}
+								onChange={() => toggleDay(day)}
+								className='mr-2'
+							/>
+							<label htmlFor={day}>{day}</label>
+						</div>
+					))}
+				</div>
 			</div>
 
 			<button

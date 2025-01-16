@@ -15,7 +15,7 @@ export default function DailyCompoundCalculatorPage() {
 			reinvestRate,
 			startDate,
 			endDate,
-			weekdaysOnly,
+			selectedDays,
 		} = input;
 
 		let currentCapital = startingCapital;
@@ -46,11 +46,20 @@ export default function DailyCompoundCalculatorPage() {
 		currentDate.setDate(currentDate.getDate() + 1);
 
 		while (currentDate <= adjustedEndDate) {
-			// Skip weekends if weekdaysOnly is true
-			if (
-				weekdaysOnly &&
-				(currentDate.getDay() === 0 || currentDate.getDay() === 6)
-			) {
+			// Map day of week (0-6) to corresponding day names
+			const dayNames = [
+				"Sunday",
+				"Monday",
+				"Tuesday",
+				"Wednesday",
+				"Thursday",
+				"Friday",
+				"Saturday",
+			];
+			const currentDayName = dayNames[currentDate.getDay()];
+
+			// Skip days not selected by the user
+			if (!selectedDays.includes(currentDayName)) {
 				currentDate.setDate(currentDate.getDate() + 1);
 				continue;
 			}
@@ -61,9 +70,9 @@ export default function DailyCompoundCalculatorPage() {
 
 			breakdown.push({
 				date: new Date(currentDate),
-				capital: currentCapital,
-				dailyGain,
-				reinvested,
+				capital: parseFloat(currentCapital.toFixed(2)),
+				dailyGain: parseFloat(dailyGain.toFixed(2)),
+				reinvested: parseFloat(reinvested.toFixed(2)),
 			});
 
 			currentDate.setDate(currentDate.getDate() + 1);

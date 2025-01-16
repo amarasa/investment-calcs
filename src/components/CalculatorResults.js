@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Line } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import {
 	Chart as ChartJS,
 	CategoryScale,
 	LinearScale,
 	PointElement,
 	LineElement,
+	BarElement,
 	Title,
 	Tooltip,
 	Legend,
@@ -17,6 +18,7 @@ ChartJS.register(
 	LinearScale,
 	PointElement,
 	LineElement,
+	BarElement,
 	Title,
 	Tooltip,
 	Legend
@@ -26,6 +28,31 @@ export default function CalculatorResults({ results }) {
 	const [view, setView] = useState("table");
 
 	const totalProfit = results.slice(-1)[0].capital - results[0].capital;
+
+	// Prepare data for Combo Chart
+	const dates = results.map((res) => res.date.toDateString());
+	const totalCapital = results.map((res) => res.capital.toFixed(2));
+	const dailyGains = results.map((res) => res.dailyGain.toFixed(2));
+
+	const comboData = {
+		labels: dates,
+		datasets: [
+			{
+				type: "line",
+				label: "Total Capital",
+				data: totalCapital,
+				borderColor: "teal",
+				backgroundColor: "rgba(23, 195, 178, 0.5)",
+				tension: 0.3,
+			},
+			{
+				type: "bar",
+				label: "Daily Profit/Loss",
+				data: dailyGains,
+				backgroundColor: "orange",
+			},
+		],
+	};
 
 	return (
 		<div className='mt-8'>
@@ -87,7 +114,12 @@ export default function CalculatorResults({ results }) {
 						{results.map((res, index) => (
 							<tr key={index}>
 								<td className='border p-2'>
-									{res.date.toDateString()}
+									{res.date.toLocaleDateString("en-US", {
+										weekday: "long",
+										year: "numeric",
+										month: "long",
+										day: "numeric",
+									})}
 								</td>
 								<td className='border p-2'>
 									${parseFloat(res.dailyGain).toFixed(2)}
@@ -103,30 +135,8 @@ export default function CalculatorResults({ results }) {
 					</tbody>
 				</table>
 			) : (
-				<Line
-					data={{
-						labels: results.map((res) => res.date.toDateString()),
-						datasets: [
-							{
-								label: "Total Capital",
-								data: results.map((res) =>
-									res.capital.toFixed(2)
-								),
-								borderColor: "teal",
-								backgroundColor: "rgba(23, 195, 178, 0.5)",
-								tension: 0.3,
-							},
-							{
-								label: "Daily Profit/Loss",
-								data: results.map((res) =>
-									res.dailyGain.toFixed(2)
-								),
-								borderColor: "orange",
-								backgroundColor: "rgba(255, 165, 0, 0.5)",
-								tension: 0.3,
-							},
-						],
-					}}
+				<Bar
+					data={comboData}
 					options={{
 						responsive: true,
 						plugins: {
